@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشغل الفيديوهات المتطور | VideoJS</title>
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --accent: #ff6b6b;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #4ecdc4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeIn 1.2s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0 40px;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+            animation: bounce 2s infinite alternate;
+        }
+        
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-20px); }
+        }
+        
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: textGlow 3s infinite alternate;
+        }
+        
+        @keyframes textGlow {
+            0% { text-shadow: 0 5px 15px rgba(255,107,107,0.3); }
+            100% { text-shadow: 0 5px 25px rgba(78,205,196,0.6); }
+        }
+        
+        header p {
+            font-size: 1.3rem;
+            opacity: 0.85;
+            max-width: 700px;
+            margin: 0 auto;
+            animation: slideIn 1s ease-out forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        @media (max-width: 1100px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .player-container {
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: #000;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transform: scale(0.95);
+            animation: scaleUp 0.8s ease-out forwards;
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes scaleUp {
+            to { transform: scale(1); }
+        }
+        
+        .playlist-section {
+            background: rgba(30, 30, 60, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            height: fit-content;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.8s ease-out forwards;
+            animation-delay: 0.6s;
+        }
+        
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .playlist-header {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .playlist-header h2 {
+            font-size: 1.8rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .playlist-count {
+            background: var(--success);
+            color: var(--dark);
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .playlist {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+        
+        .playlist-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            transform: translateX(30px);
+            opacity: 0;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-5px) !important;
+        }
+        
+        .playlist-item.active {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: var(--success);
+        }
+        
+        .thumbnail {
+            width: 140px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            flex-shrink: 0;
+            position: relative;
+            background: linear-gradient(45deg, #1a2a6c, #b21f1f);
+            transition: all 0.3s ease;
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        
+        .playlist-item:hover .thumbnail img {
+            transform: scale(1.05);
+        }
+        
+        .item-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .item-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--light);
+        }
+        
+        .item-info .video-desc {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .video-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .duration {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            align-self: center;
+            flex-shrink: 0;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+            padding-top: 40px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-card {
+            background: rgba(30, 30, 60, 0.7);
+            border-radius: 15px;
+            padding: 25px 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px) !important;
+            background: rgba(78, 84, 200, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-card i {
+            font-size: 2.8rem;
+            color: var(--success);
+            margin-bottom: 20px;
+            background: rgba(78, 205, 196, 0.1);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .feature-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.1rem;
+            opacity: 0.8;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.8s ease-out forwards;
+            animation-delay: 1.5s;
+        }
+        
+        /* Scrollbar styling */
+        .playlist::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .playlist::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .playlist::-webkit-scrollbar-thumb {
+            background: var(--success);
+            border-radius: 10px;
+        }
+        
+        /* VideoJS customization */
+        .video-js {
+            width: 100%;
+            height: 500px;
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Loader */
+        .loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loader.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--success);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .video-js {
+                height: 300px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .thumbnail {
+                width: 100px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-play-circle"></i>
+            </div>
+            <h1>مشغل الفيديوهات المتطور</h1>
+            <p>مشغل فيديو احترافي مع دعم كافة الميزات المتقدمة، استمتع بتجربة مشاهدة فريدة</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="player-section">
+                <div class="player-container">
+                    <div class="loader" id="video-loader">
+                        <div class="loader-spinner"></div>
+                    </div>
+                    <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" 
+                        poster="https://images.unsplash.com/photo-1574717024453-354056aafa98?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+                        data-setup='{"playbackRates": [0.5, 1, 1.5, 2]}'>
+                        <source src="Videos/1.mp4" type="video/mp4">
+                        <track kind="subtitles" src="subtitles/1_ar.vtt" srclang="ar" label="العربية" default>
+                        <track kind="subtitles" src="subtitles/1_en.vtt" srclang="en" label="English">
+                        <p class="vjs-no-js">
+                            لرؤية هذا الفيديو، يرجى تمكين JavaScript واعتماد متصفح يدعم HTML5 فيديو.
+                        </p>
+                    </video>
+                </div>
+            </div>
+            
+            <section class="playlist-section">
+                <div class="playlist-header">
+                    <h2><i class="fas fa-list"></i> قائمة التشغيل</h2>
+                    <span class="playlist-count">4 فيديوهات</span>
+                </div>
+                
+                <div class="playlist" id="video-playlist">
+                    <!-- سيتم توليد قائمة التشغيل ديناميكيًا -->
+                </div>
+            </section>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-closed-captioning"></i>
+                <h3>دعم الترجمة</h3>
+                <p>يدعم المشغل الترجمة بعدة لغات مع إمكانية التبديل بينها بسهولة أثناء التشغيل</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-hd"></i>
+                <h3>جودة متعددة</h3>
+                <p>تشغيل الفيديوهات بدقة عالية تصل إلى 4K مع إمكانية تغيير الجودة حسب اتصالك</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-tachometer-alt"></i>
+                <h3>سرعة التشغيل</h3>
+                <p>تغيير سرعة التشغيل لتتناسب مع احتياجاتك (0.5x إلى 2x)</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>تصميم متجاوب</h3>
+                <p>واجهة مستخدم متكاملة تعمل على جميع الأجهزة من الجوال إلى الحاسوب</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>تم التطوير باستخدام VideoJS | مشغل الفيديوهات المتطور &copy; 2023</p>
+        </footer>
+    </div>
+    
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script>
+        // بيانات الفيديوهات مع تفاصيل كاملة
+        const videos = [
+            {
+                id: 1,
+                title: "فيديو المقدمة",
+                duration: "10:25",
+                desc: "مقدمة شاملة عن مشغل الفيديو المتطور ومميزاته الفريدة التي تجعل تجربة المشاهدة لا تُنسى",
+                thumbnail: "https://images.unsplash.com/photo-1574717024453-354056aafa98?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+            },
+        ];
+
+        // توليد قائمة التشغيل مع تفاصيل كاملة
+        function generatePlaylist() {
+            const playlist = document.getElementById('video-playlist');
+            playlist.innerHTML = '';
+            
+            videos.forEach((video, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                const delay = index * 0.1;
+                
+                const item = document.createElement('div');
+                item.className = `playlist-item ${isActive}`;
+                item.setAttribute('data-video', `Videos/${video.id}.mp4`);
+                item.setAttribute('data-poster', video.thumbnail);
+                item.setAttribute('data-title', video.title);
+                item.setAttribute('data-desc', video.desc);
+                
+                item.innerHTML = `
+                    <div class="thumbnail">
+                        <img src="${video.thumbnail}" alt="صورة مصغرة للفيديو ${video.id}">
+                    </div>
+                    <div class="item-info">
+                        <h4>${video.title}</h4>
+                        <div class="video-desc">${video.desc}</div>
+                        <div class="video-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-eye"></i>
+                                <span>${Math.floor(Math.random() * 1000) + 500} مشاهدة</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="far fa-calendar"></i>
+                                <span>${new Date().toLocaleDateString('ar-EG')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="duration">${video.duration}</div>
+                `;
+                
+                playlist.appendChild(item);
+                
+                // إضافة أنيميشن لكل عنصر
+                setTimeout(() => {
+                    item.style.animation = `slideIn 0.5s ease-out forwards`;
+                    item.style.animationDelay = `${delay}s`;
+                    item.style.opacity = 1;
+                    item.style.transform = 'translateX(0)';
+                }, 100);
+            });
+        }
+        
+        // دالة لاستخراج أول لقطة من الفيديو
+        function getVideoThumbnail(videoPath, callback) {
+            const video = document.createElement('video');
+            video.crossOrigin = 'anonymous';
+            video.src = videoPath;
+            video.preload = 'metadata';
+            
+            video.addEventListener('loadeddata', function() {
+                if (video.readyState >= 2) {
+                    video.currentTime = 0.1;
+                }
+            });
+            
+            video.addEventListener('seeked', function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const thumbnail = canvas.toDataURL('image/jpeg');
+                callback(thumbnail);
+            });
+            
+            video.addEventListener('error', function() {
+                callback('https://via.placeholder.com/140x80/1a2a6c/ffffff?text=فيديو');
+            });
+            
+            video.load();
+        }
+        
+        // Initialize Video.js player
+        const player = videojs('my-video');
+        
+        // Video loader element
+        const loader = document.getElementById('video-loader');
+        
+        // Show loader when video is loading
+        player.on('waiting', function() {
+            loader.classList.add('active');
+        });
+        
+        // Hide loader when video is playing
+        player.on('playing', function() {
+            loader.classList.remove('active');
+        });
+        
+        // Hide loader when video ends
+        player.on('ended', function() {
+            loader.classList.remove('active');
+        });
+        
+        // Handle playlist item clicks
+        function setupPlaylistEvents() {
+            document.querySelectorAll('.playlist-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    document.querySelectorAll('.playlist-item').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Get video data
+                    const videoSrc = this.getAttribute('data-video');
+                    const poster = this.getAttribute('data-poster');
+                    const title = this.getAttribute('data-title');
+                    const desc = this.getAttribute('data-desc');
+                    
+                    // Show loader
+                    loader.classList.add('active');
+                    
+                    // Change video source
+                    player.src({src: videoSrc, type: 'video/mp4'});
+                    player.poster(poster);
+                    
+                    // Play the video
+                    player.play();
+                });
+            });
+        }
+        
+        // Auto play next video when current ends
+        player.on('ended', function() {
+            const currentItem = document.querySelector('.playlist-item.active');
+            const nextItem = currentItem.nextElementSibling;
+            
+            if (nextItem) {
+                nextItem.click();
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Space bar to play/pause
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (player.paused()) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
+            }
+            
+            // Arrow keys for seeking
+            if (e.code === 'ArrowRight') {
+                player.currentTime(player.currentTime() + 5);
+            }
+            if (e.code === 'ArrowLeft') {
+                player.currentTime(player.currentTime() - 5);
+            }
+            
+            // M key for mute
+            if (e.code === 'KeyM') {
+                player.muted(!player.muted());
+            }
+            
+            // F key for fullscreen
+            if (e.code === 'KeyF') {
+                if (player.isFullscreen()) {
+                    player.exitFullscreen();
+                } else {
+                    player.requestFullscreen();
+                }
+            }
+            
+            // N key for next video
+            if (e.code === 'KeyN') {
+                const currentItem = document.querySelector('.playlist-item.active');
+                const nextItem = currentItem.nextElementSibling;
+                if (nextItem) nextItem.click();
+            }
+            
+            // P key for previous video
+            if (e.code === 'KeyP') {
+                const currentItem = document.querySelector('.playlist-item.active');
+                const prevItem = currentItem.previousElementSibling;
+                if (prevItem) prevItem.click();
+            }
+        });
+        
+        // Initialize animations for feature cards
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.animation = `slideUp 0.8s ease-out forwards`;
+                card.style.animationDelay = `${0.8 + (index * 0.2)}s`;
+                card.style.opacity = 1;
+                card.style.transform = 'translateY(0)';
+            }, 500);
+        });
+        
+        // Initialize the playlist
+        generatePlaylist();
+        setupPlaylistEvents();
+        
+        // استخراج الصور المصغرة من الفيديوهات
+        setTimeout(() => {
+            document.querySelectorAll('.playlist-item').forEach(item => {
+                const videoPath = item.getAttribute('data-video');
+                getVideoThumbnail(videoPath, function(thumbnail) {
+                    const img = item.querySelector('.thumbnail img');
+                    if (img) {
+                        img.src = thumbnail;
+                    }
+                });
+            });
+        }, 1000);
+    </script>
+</body>
+</html>
