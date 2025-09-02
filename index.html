@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>كسكسني</title>
+<title>D</title>
 
 <!-- VideoJS CSS -->
 <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
@@ -341,8 +341,40 @@
     border-radius: 0 0 10px 10px;
 }
 
+.sidebar {
+    width: 200px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+    height: 500px;
+    overflow-y: auto;
+}
 
-    .player-container { padding: 15px; position: relative; }
+.sidebar h3 {
+    color: #ffcc00;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.sidebar ul li:hover {
+    background: rgba(255, 204, 0, 0.3);
+    transform: translateX(5px);
+}
+
 
     .video-js { width: 100%; height: 500px; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
 
@@ -378,18 +410,31 @@
 <!-- محتوى الموقع -->
 <div class="container" id="mainContent">
     <header>
-        <h1> فيديوهات رقص ساخنة للمتعة و السكس </h1>
+        <h1> S </h1>
     </header>
-    <div class="player-container">
-        <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" data-setup='{}'>
-            <source src="Videos/1.mp4" type="video/mp4" />
-            <p class="vjs-no-js">
-                لتشغيل هذا الفيديو، يرجى تمكين JavaScript، أو ترقية متصفحك إلى متصفح يدعم HTML5 video.
-            </p>
-            <track kind="captions" src="video1.vtt" srclang="ar" label="العربية" default>
-        </video>
+    <div class="main-wrapper" style="display:flex; gap:20px;">
+        <!-- القائمة الجانبية -->
+        <aside class="sidebar">
+            <h3>قائمة الفيديوهات</h3>
+            <ul id="videoList">
+                <li data-src="Videos/1.mp4">فيديو 1</li>
+                <li data-src="Videos/2.mp4">فيديو 2</li>
+                <li data-src="Videos/3.mp4">فيديو 3</li>
+            </ul>
+        </aside>
+
+        <!-- مشغل الفيديو -->
+        <div class="player-container" style="flex:1;">
+            <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" data-setup='{}'>
+                <source src="Videos/1.mp4" type="video/mp4" />
+                <p class="vjs-no-js">
+                    لتشغيل هذا الفيديو، يرجى تمكين JavaScript أو ترقية متصفحك.
+                </p>
+            </video>
+        </div>
     </div>
 </div>
+
 
 <!-- VideoJS Script -->
 <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
@@ -401,6 +446,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const player = videojs('my-video');
+    // تغيير الفيديو عند اختيار عنصر من القائمة
+const videoListItems = document.querySelectorAll('#videoList li');
+
+videoListItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const src = item.getAttribute('data-src');
+        player.src({ type: "video/mp4", src: src });
+        player.play();
+    });
+});
+
     player.ready(function() {
         setTimeout(() => { if(player.textTracks().length > 0) player.textTracks()[0].mode = 'showing'; }, 1000);
         player.controlBar.addChild('subtitlesButton');
